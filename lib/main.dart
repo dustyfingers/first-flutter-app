@@ -23,15 +23,47 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Hello World")),
-        body: Column(
-            children: <Widget>[TestWidget(), TestWidget(), TestWidget()]));
+        appBar: AppBar(title: Text("Hello World")), body: TextInputWidget());
   }
 }
 
-class TestWidget extends StatelessWidget {
+// keyboard shortcut 'stful' for a stateful widget
+class TextInputWidget extends StatefulWidget {
+  @override
+  _TextInputWidgetState createState() => _TextInputWidgetState();
+}
+
+class _TextInputWidgetState extends State<TextInputWidget> {
+  // this controller obj gives us access to the text inputs contents!
+  final controller = TextEditingController();
+  String text = "";
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
+  void changeText(text) {
+    if (text == "Hello World!") {
+      controller.clear();
+      text = "";
+    }
+    // ! ANY time you set state it should be within the setState method
+    setState(() {
+      this.text = text;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Text("Hello stuff here!");
+    return Column(children: <Widget>[
+      TextField(
+          controller: this.controller,
+          decoration: InputDecoration(
+              prefixIcon: Icon(Icons.message), labelText: "Type a message:  "),
+          onChanged: (text) => this.changeText(text)),
+      Text(this.text)
+    ]);
   }
 }
