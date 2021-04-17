@@ -19,16 +19,36 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  String text = "";
+
+  void changeText(String text) {
+    this.setState(() {
+      this.text = text;
+    });
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Hello World")), body: TextInputWidget());
+        appBar: AppBar(title: Text("Hello World")),
+        body: Column(children: <Widget>[
+          TextInputWidget(this.changeText),
+          Text(this.text)
+        ]));
   }
 }
 
 // keyboard shortcut 'stful' for a stateful widget
 class TextInputWidget extends StatefulWidget {
+  final Function(String) callback;
+
+  TextInputWidget(this.callback);
+
   @override
   _TextInputWidgetState createState() => _TextInputWidgetState();
 }
@@ -36,34 +56,32 @@ class TextInputWidget extends StatefulWidget {
 class _TextInputWidgetState extends State<TextInputWidget> {
   // this controller obj gives us access to the text inputs contents!
   final controller = TextEditingController();
-  String text = "";
 
+  // since we start a controller up there we need to modify the parent classes dispose function
+  // to dispose of it as well
   @override
   void dispose() {
     super.dispose();
     controller.dispose();
   }
 
-  void changeText(text) {
-    if (text == "Hello World!") {
-      controller.clear();
-      text = "";
-    }
-    // ! ANY time you set state it should be within the setState method
-    setState(() {
-      this.text = text;
-    });
+  void handleSendButtonPressed() {
+    widget.callback(controller.text);
+    // after submission clear the controller
+    controller.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: <Widget>[
-      TextField(
-          controller: this.controller,
-          decoration: InputDecoration(
-              prefixIcon: Icon(Icons.message), labelText: "Type a message:  "),
-          onChanged: (text) => this.changeText(text)),
-      Text(this.text)
-    ]);
+    return TextField(
+        controller: this.controller,
+        decoration: InputDecoration(
+            prefixIcon: Icon(Icons.message),
+            labelText: "Type a message:  ",
+            suffixIcon: IconButton(
+                icon: Icon(Icons.send),
+                splashColor: Colors.green,
+                tooltip: 'Post message',
+                onPressed: this.handleSendButtonPressed)));
   }
 }
